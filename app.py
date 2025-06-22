@@ -1,78 +1,64 @@
-from flask import Flask, render_template, request, send_from_directory
-from werkzeug.utils import secure_filename
-from PIL import Image
-import piexif
+from flask import Flask, render_template, request, redirect, send_from_directory
 import os
 import subprocess
 import json
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
-UPLOAD_FOLDER = "uploads"
-CLEANED_FOLDER = "cleaned"
+UPLOAD_FOLDER = 'uploads'
+CLEANED_FOLDER = 'cleaned'
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(CLEANED_FOLDER, exist_ok=True)
 
-def get_image_exif(image_path):
-    try:
-        exif_dict = piexif.load(image_path)
-        readable = {}
-        for ifd in exif_dict:
-            for tag in exif_dict[ifd]:
-                try:
-                    key = piexif.TAGS[ifd][tag]["name"]
-                    val = exif_dict[ifd][tag]
-                    readable[key] = str(val)
-                except:
-                    pass
-        return readable
-    except:
-        return {}
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-def get_video_metadata(video_path):
-    try:
-        result = subprocess.run(
-            ['ffprobe', '-v', 'quiet', '-print_format', 'json', '-show_format', video_path],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
-        )
-        return json.loads(result.stdout)
-    except:
-        return {}
+def clean_metadata(input_path, output_path):
+    subprocess.run([
+        "ffmpeg", "-i", input_path,
+        "-map_metadata", "-1", "-c", "copy",
+        output_path
+    ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+def extract_metadata(file_path):
+    result = subprocess.run([
+        "ffprobe", "-v", "quiet", "-print_format", "json",
+        "-show_format", file_path
+    ], capture_output=True, text=True)
+    return json.loads(result.stdout)
+
+def extract_gps(metadata):
+    tags = metadata.get('format', {}).get('tags', {})
+    gps_data = {}
+
+    loc = tags.get("location") or tags.get("com.apple.quicktime.location.ISO6709")
+    if loc:
+        import re
+        match = re.match(r'([+-]\d+\.\d+)([+-]\d+\.\d+)', loc)
+        if match:
+            lat = float(match.group(1))
+            lon = float(match.group(2))
+            gps_data['latitude'] = lat
+            gps_data['longitude'] = lon
+            gps_data['link'] = f"https://www.google.com/maps?q={lat},{lon}"
+    return gps_data if gps_data else None
 
 @app.route("/", methods=["GET", "POST"])
 def index():
     if request.method == "POST":
-        file = request.files["media"]
-        if not file:
-            return "Aucun fichier."
-
+        file = request.files["file"]
         filename = secure_filename(file.filename)
-        ext = filename.split(".")[-1].lower()
-        path = os.path.join(UPLOAD_FOLDER, filename)
-        file.save(path)
+        upload_path = os.path.join(UPLOAD_FOLDER, filename)
+        file.save(upload_path)
 
-        cleaned_name = f"cleaned_{filename}"
-        cleaned_path = os.path.join(CLEANED_FOLDER, cleaned_name)
+        cleaned_filename = f"cleaned_{filename}"
+        cleaned_path = os.path.join(CLEANED_FOLDER, cleaned_filename)
 
-        metadata = {}
-        if ext in ["jpg", "jpeg", "png"]:
-            metadata = get_image_exif(path)
-            image = Image.open(path)
-            if ext == "png":
-                data = list(image.getdata())
-                new_image = Image.new(image.mode, image.size)
-                new_image.putdata(data)
-                new_image.save(cleaned_path)
-            else:
-                image.save(cleaned_path, "jpeg", exif=b"")
-        elif ext in ["mp4", "mov", "avi", "webm", "mkv"]:
-            metadata = get_video_metadata(path)
-            subprocess.run(["ffmpeg", "-i", path, "-map_metadata", "-1", "-c", "copy", cleaned_path])
-        else:
-            return "Format non supporté."
+        clean_metadata(upload_path, cleaned_path)
+        metadata = extract_metadata(upload_path)
+        gps_info = extract_gps(metadata)
 
-        return render_template("result.html", filename=cleaned_name, metadata=metadata)
+        return render_template("result.html", filename=cleaned_filename, metadata=metadata, gps=gps_info)
     return render_template("index.html")
 
 @app.route("/download/<filename>")
