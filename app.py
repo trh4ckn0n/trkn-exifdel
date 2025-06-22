@@ -69,8 +69,8 @@ def index():
             gps_info = extract_gps(metadata)
 
             results.append({
-                'original_name': filename,
-                'cleaned_name': cleaned_filename,
+                'original_filename': filename,
+                'cleaned_filename': cleaned_filename,
                 'metadata': metadata,
                 'gps': gps_info
             })
