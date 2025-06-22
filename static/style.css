@@ -1,0 +1,25 @@
+body {
+    background-color: #111;
+    color: #0ff;
+    font-family: monospace;
+    text-align: center;
+    padding: 2rem;
+}
+input, button {
+    padding: 10px;
+    margin: 10px;
+    border: none;
+    background: #0ff;
+    color: #000;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 5px;
+}
+input[type="file"] {
+    background: #222;
+    color: #0ff;
+}
+a {
+    color: #0f0;
+    font-size: 18px;
+}
