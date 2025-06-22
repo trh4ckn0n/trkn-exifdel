@@ -80,4 +80,4 @@ def download(filename):
     return send_from_directory(CLEANED_FOLDER, filename, as_attachment=True)
 
 if __name__ == "__main__":
-    app.run(Debug=False, host="0.0.0.0")
+    app.run(debug=False, host="0.0.0.0")
