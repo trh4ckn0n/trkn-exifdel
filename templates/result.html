@@ -1,23 +1,33 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
-  <title>😈 EXIF Nettoyé</title>
+  <meta charset="UTF-8">
+  <title>😈 Résultats du nettoyage - trhacknon EXIF Killer</title>
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
   <div class="container">
-    <h1>😈 Fichier nettoyé</h1>
-    <a class="btn" href="/download/{{ filename }}">📥 Télécharger sans EXIF</a>
-  {% if gps %}
-    <h2>🌍 Position GPS détectée :</h2>
-    <p>Latitude : {{ gps.latitude }}<br>Longitude : {{ gps.longitude }}</p>
-    <a class="btn" href="{{ gps.link }}" target="_blank">📍 Voir sur Google Maps</a>
-  {% endif %}
+    <h1>✅ Fichiers nettoyés</h1>
 
-  <h2>📊 Métadonnées détectées :</h2>
-  <pre>{{ metadata | tojson(indent=2) }}</pre>
+    {% for result in results %}
+      <div class="file-block">
+        <h2>📁 {{ result.original_filename }}</h2>
 
-  <a class="btn" href="/">🔁 Retour</a>
+        <a class="btn" href="/download/{{ result.cleaned_filename }}">📥 Télécharger sans EXIF</a>
+
+        {% if result.gps %}
+          <h3>🌍 Position GPS détectée :</h3>
+          <p>Latitude : {{ result.gps.latitude }}<br>Longitude : {{ result.gps.longitude }}</p>
+          <a class="btn" href="{{ result.gps.link }}" target="_blank">📍 Voir sur Google Maps</a>
+        {% endif %}
+
+        <h3>📊 Métadonnées brutes :</h3>
+        <pre>{{ result.metadata | tojson(indent=2) }}</pre>
+      </div>
+      <hr>
+    {% endfor %}
+
+    <a class="btn" href="/">🔁 Retour</a>
   </div>
 </body>
 </html>
