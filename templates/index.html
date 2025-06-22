@@ -16,7 +16,7 @@
   <meta property="og:description" content="Supprime les métadonnées de tes photos et vidéos 📷📹 pour rester anonyme.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://trkn-exifdel.onrender.com/">
-  <meta property="og:image" content="https://trkn-exifdel.onrender.com/static/preview.jpg"> <!-- Crée une image preview style hacker -->
+  <meta property="og:image" content="https://trkn-exifdel.onrender.com/static/preview.jpg">
   <meta property="og:site_name" content="trhacknon EXIF Killer">
 
   <!-- Twitter Card -->
@@ -32,11 +32,12 @@
 <body>
   <div class="container">
     <h1>🕶️ trhacknon EXIF Killer</h1>
-    <p class="subtitle">📡Supprime les métadonnées de tes photos et vidéos 📷/📹</p>
+    <p class="subtitle">📡 Supprime les métadonnées de tes photos et vidéos 📷/📹</p>
 
     <form method="POST" enctype="multipart/form-data">
-      <input type="file" name="file" required>
-      <button type="submit">🔪 Nettoyer</button>
+      <p><strong>Choisis une ou plusieurs images/vidéos à nettoyer :</strong></p>
+      <input type="file" name="file" accept="image/*,video/*" multiple required>
+      <button type="submit">🔪 Nettoyer les fichiers sélectionnés</button>
     </form>
 
     <footer>
