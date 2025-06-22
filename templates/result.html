@@ -5,9 +5,9 @@
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-  <h1># Fichier nettoyé</h1>
-  <a class="btn" href="/download/{{ filename }}">📥 Télécharger sans EXIF</a>
-
+  <div class="container">
+    <h1>✅ Fichier nettoyé</h1>
+    <a class="btn" href="/download/{{ filename }}">📥 Télécharger sans EXIF</a>
   {% if gps %}
     <h2>🌍 Position GPS détectée :</h2>
     <p>Latitude : {{ gps.latitude }}<br>Longitude : {{ gps.longitude }}</p>
@@ -18,5 +18,6 @@
   <pre>{{ metadata | tojson(indent=2) }}</pre>
 
   <a class="btn" href="/">🔁 Retour</a>
+  </div>
 </body>
 </html>
