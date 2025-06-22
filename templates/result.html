@@ -2,11 +2,21 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Fichier nettoyé</title>
+    <title>Résultat</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <h1>✅ Fichier nettoyé</h1>
-    <a href="{{ url_for('download', filename=filename) }}">📥 Télécharger le fichier nettoyé</a>
+    <h1>✅ Fichier nettoyé avec succès</h1>
+
+    <a href="{{ url_for('download', filename=filename) }}">📥 Télécharger le fichier sans EXIF</a>
+
+    {% if metadata %}
+        <h2>📄 Métadonnées avant suppression :</h2>
+        <pre style="text-align: left; padding: 1rem; background:#222; color:#0f0; border:1px solid #0ff; border-radius:8px; max-width:90vw; overflow-x:auto;">
+{{ metadata | tojson(indent=2) }}
+        </pre>
+    {% else %}
+        <p>❌ Aucune métadonnée détectée ou supportée.</p>
+    {% endif %}
 </body>
 </html>
